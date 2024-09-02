@@ -25,7 +25,7 @@ jobs:
       run: python -m unittest discover
 
     - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.10.0  # Ensure this version is correct
+      uses: webfactory/ssh-agent@v0.5.4  # Ensure this version is correct
       with:
         ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
