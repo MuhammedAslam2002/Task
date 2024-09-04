@@ -28,7 +28,7 @@ jobs:
 
     - name: Transfer Files to EC2
       run: |
-        scp -o StrictHostKeyChecking=no -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task/Task10
+        scp -o StrictHostKeyChecking=no -r * ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task/Task10
 
     - name: Deploy and Restart Application
       run: |
