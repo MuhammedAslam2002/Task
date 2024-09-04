@@ -28,12 +28,12 @@ jobs:
 
     - name: Transfer Files to EC2
       run: |
-        scp -o StrictHostKeyChecking=no -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task10/
+        scp -o StrictHostKeyChecking=no -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task/Task10
 
     - name: Deploy and Restart Application
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd /home/ubuntu/Task10 || { echo "Directory not found"; exit 1; }
+          cd /home/ubuntu/Task/Task10 || { echo "Directory not found"; exit 1; }
           # Commands to restart your application
           sudo systemctl restart your-app-service || { echo "Failed to restart service"; exit 1; }
         EOF
