@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,37 +6,34 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Test the application
+      run: python -m unittest discover
 
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t flask_app .cd /home/ubuntu/Task/Task10
-          docker tag flask_app:latest ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Deploy to EC2
-        run: |
-          # Save the PEM file to a temporary file
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/your-key.pem
-          chmod 600 /tmp/your-key.pem
+    - name: Transfer Files to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task/Task10
 
-          # Connect to EC2 and deploy the container
-          ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
-          docker stop $(docker ps -q)
-          docker run -d -p 80:5000 ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
-          EOF
+    - name: Deploy and Restart Application
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd /home/ubuntu/Task/Task10 || { echo "Directory not found"; exit 1; }
+          # Commands to restart your application
+          sudo systemctl restart your-app-service || { echo "Failed to restart service"; exit 1; }
+        EOF
