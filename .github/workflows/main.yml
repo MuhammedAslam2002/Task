@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t flask_app ./home/ubuntu/Task/Task10
+          docker build -t flask_app .cd /home/ubuntu/Task/Task10
           docker tag flask_app:latest ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
 
