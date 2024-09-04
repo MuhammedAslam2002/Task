@@ -34,6 +34,8 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd /home/ubuntu/Task/Task10 || { echo "Directory not found"; exit 1; }
-          # Commands to restart your application
-          sudo systemctl restart your-app-service || { echo "Failed to restart service"; exit 1; }
+          docker build -t flask-app .
+          docker stop flask-app-container || true
+          docker rm flask-app-container || true
+          docker run -d -p 80:5000 --name flask-app-container flask-app
         EOF
