@@ -26,6 +26,11 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
+    - name: Add EC2 Host to Known Hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
     - name: Transfer Files to EC2
       run: |
         scp -o StrictHostKeyChecking=no -r ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/Task/Task10
@@ -33,7 +38,8 @@ jobs:
     - name: Deploy and Restart Application
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          set -e
+          set -x
           cd /home/ubuntu/Task/Task10 || { echo "Directory not found"; exit 1; }
-          # Commands to restart your application
           sudo systemctl restart your-app-service || { echo "Failed to restart service"; exit 1; }
         EOF
